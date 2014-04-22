@@ -121,7 +121,7 @@ class LifxBulb(object):
         return self._controller.set_temperature(kelvin, fadeTime, self._bulb_addr)
 
     def __repr__(self):
-        return '<LifxBulb: addr=%r, name=%r, controller=%r>' % (self._bulb_addr, self._label, self._controller)
+        return '<LifxBulb: bulb_addr=%r, label=%r, controller=%r>' % (self._bulb_addr, self._label, self._controller)
 
     def __cmp__(self, other):
         return cmp(self._bulb_addr, other._bulb_addr)
