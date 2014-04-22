@@ -53,3 +53,21 @@ Two common issues with installing
 * **Windows users** - install the pre-built binaries for your python distribution
   using the links in the following URL: http://alastairs-place.net/projects/netifaces/
   (The section is just above the start of the Changelog section).
+
+Documentation
+=============
+
+If you don't want to build the documentation yourself, you can `view it online
+<http://some-documentation-server.example.com/>`_.
+
+Documentation may be built if you have `Sphinx <http://sphinx-doc.org/>`_.
+You'll need to have pylifx built and in your PYTHON_PATH (or run sphinx from
+inside of a virtualenv that has it installed).  You can then build the HTML
+documentation with:
+
+.. code-block:: console
+
+	$ make html
+
+There are other formats available, please see the Sphinx documentation for more
+information.
