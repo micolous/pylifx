@@ -36,7 +36,7 @@ setup(
     keywords = ['lifx', 'smart', 'light', 'bulb'],
     url = 'https://pypi.python.org/pypi/pylifx',
     packages = ['pylifx', 'examples'],
-    long_description = read('README.txt'),
+    long_description = read('README.rst'),
     package_data={'': ['LICENSE.txt']},
 
     install_requires = ['bitstring>=3.1.2', 'netifaces>=0.7'],
