@@ -67,7 +67,10 @@ documentation with:
 
 .. code-block:: console
 
-	$ make html
+  $ cd doc
+  $ make html
+
+The documentation will then be available in ``doc/build/html/``.
 
 There are other formats available, please see the Sphinx documentation for more
 information.

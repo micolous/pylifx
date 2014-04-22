@@ -12,7 +12,8 @@ Contents:
    :maxdepth: 2
 
    example.bulbs
-   pylifx
+   lifxcontroller
+   lifxbulb
 
 Indices and tables
 ==================

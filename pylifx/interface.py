@@ -22,7 +22,7 @@ from thread import start_new_thread
 from .networking import LifxBulbTCPServer, LifxUDPSocket, get_interface, processMAC
 from time import sleep
 
-__all__ = ['LifxController', 'LifxBulbEmulator', 'LifxBulbBridge']
+__all__ = ['LifxController', 'LifxBulb', 'LifxBulbEmulator', 'LifxBulbBridge']
 
 
 _LIFX_PORT = 56700
@@ -53,9 +53,20 @@ def _smooth_gradient(gradient):
 
 class LifxBulb(object):
     """
-    Class to represent a bulb on a :class:`LifxController`.
+    Class to represent a bulb on a :class:`~pylifx.LifxController`.
     
-    :param LifxController controller: Controller this bulb is associated with.
+    You shouldn't create instances of this class yourself, instead you should
+    use methods of :class:`~pylifx.LifxController`.
+    
+    See also:
+    
+    * :meth:`pylifx.LifxController.find_bulbs`
+    * :meth:`pylifx.LifxController.bulb_by_label`
+    * :meth:`pylifx.LifxController.bulb_by_addr`
+    * :attr:`pylifx.LifxController.bulbs`
+    
+    :param controller: Controller this bulb is associated with.
+    :type controller: :class:`~pylifx.LifxController`
     :param str bulb_addr: The MAC address of the bulb.
     """
 
@@ -65,18 +76,48 @@ class LifxBulb(object):
         self._label = label
 
     def on(self):
+        """
+        Turns on the light bulb.
+        """
         return self._controller.on(self._bulb_addr)
 
     def off(self):
+        """
+        Turns off the light bulb.
+        """
         return self._controller.off(self._bulb_addr)
 
     def set_rgb(self, red, green, blue, fadeTime=1):
+        """
+        Sets the colour of the light bulb, using red, green and blue.
+        
+        :param float red: Level between 0.0 and 1.0 for the brightness of the red channel.
+        :param float green: Level between 0.0 and 1.0 for the brightness of the green channel.
+        :param float blue: Level between 0.0 and 1.0 for the brightness of the blue channel.
+        :param float fadeTime: Time, in seconds, to perform the colour fade transition over.
+        """
         return self._controller.set_rgb(red, green, blue, fadeTime, self._bulb_addr)
 
     def set_hsb(self, hue, saturation, brightness, fadeTime=1):
+        """
+        Sets the colour of the light bulb, using hue, saturation and brightness.
+        
+        :param float hue: Value between 0.0 and 1.0 indicating the hue of the colour to set, with red being 0.0.
+        :param float saturation: Value between 0.0 and 1.0 indicating the saturation of the colour to set, with 0.0 being no colour saturation.
+        :param float brightness: Value between 0.0 and 1.0 indicating the brightness of the colour to set, with 0.0 being darkest.
+        :param float fadeTime: Time, in seconds, to perform the colour fade transition over.
+
+        """
         return self._controller.set_hsb(hue, saturation, brightness, fadeTime, self._bulb_addr)
 
     def set_temperature(self, kelvin, fadeTime=1):
+        """
+        Sets the colour of the light bulb to white, with the given colour temperature.
+        
+        :param int kelvin: Colour temperature to set to the bulb to, between 0 and 65535.
+        :param float fadeTime: Time, in seconds, to perform the colour fade transition over.
+
+        """
         return self._controller.set_temperature(kelvin, fadeTime, self._bulb_addr)
 
     def __repr__(self):
@@ -100,10 +141,15 @@ class LifxBulb(object):
 class LifxController(object):
     """
     Class to interface with a LIFX controller.
-    
+
     :param str site_addr: MAC address of the LIFX PAN gateway
-    :param str name: Label for this LIFX controller, or None to use the site_addr.
-    :param str intf_name: Network interface to use when sending packets to the LIFX PAN gateway.
+    :param str name: Label for this LIFX controller, or None to use the ``site_addr``.
+    :param str intf_name: Network interface to use when sending packets to the LIFX PAN gateway.  If this is not specified, this will default to using the first interface with IPv4 connectivity.
+
+    .. attribute:: bulbs
+
+        A :class:`list` of :class:`~pylifx.LifxBulb` that have been discovered
+        using :meth:`~pylifx.LifxController.find_bulbs`.
     """
     def __init__(self, site_addr, name = None, intf_name = None):
         if site_addr is None:
@@ -202,7 +248,8 @@ class LifxController(object):
         k = self._annotate_bulb_addr(bulb_addr)
         print 'Setting colour temperature of %s to (%dK) over %d seconds' % (self._name if bulb_addr is None else k['bulb_addr'], kelvin, fadeTime)
         self._set_colour(0, 0, 1.0, kelvin, fadeTime, **k)
-    
+
+
     def run_scene(self, gradient, bulb_addr=None):
         """
         Runs a scene on a given bulb.  The gradient is a dict of values, with the key
@@ -238,11 +285,16 @@ class LifxController(object):
                    hue = hue, saturation = saturation, brightness = brightness,
                    kelvin = kelvin,
                    fadeTime = fadeTime, **kwargs)
+
+
     def find_bulbs(self):
         """
-        Populate the list of bulbs.
-        
-        This is made available in the ``bulbs`` attribute.
+        Populate the list of bulbs by sending a discovery packet to the LIFX PAN
+        gateway.
+
+        This is made available in :attr:`pylifx.LifxController.bulbs`.
+
+        :returns: None
         """
         # swallow events first
         for x in self._socket.recv_forever(): pass
@@ -257,25 +309,57 @@ class LifxController(object):
                     continue
                 self.bulbs.append(LifxBulb(self, msg[1]['bulb_addr'], msg[1]['bulbLabel'].strip('\x00')))
 
+
     def bulb_by_label(self, label):
         """
-        Gets a bulb by it's label.
-        
-        Returns None if the bulb does not exist.
-        
-        Requires that :meth:`find_bulbs` is called first.
-        
-        :rtype:`LifxBulb`
+        Gets a :class:`~pylifx.LifxBulb` by it's label from the list of bulbs in
+        :attr:`~pylifx.LifxController.bulbs`.
+
+        Requires that :meth:`~pylifx.LifxController.find_bulbs` is called first.
+
+        Returns None if the bulb does not exist, or if the bulb was not known
+        last time bulb discovery was run.
+
+        :param unicode label: The bulb label to search for.  This is case-sensitive.
+
+        :returns: The bulb with the given label, or None if it does not exist or is not known.
+        :rtype: :class:`~pylifx.LifxBulb`
+
+        :raises AssertionError: If :meth:`~pylifx.LifxController.find_bulbs` has not been called first.
         """
+        assert self.bulbs is not None, 'Call LifxController.find_bulbs first to discover bulbs.'
+
         for bulb in self.bulbs:
             if bulb._label == label:
                 return bulb
+
+
     def bulb_by_addr(self, addr):
+        """
+        Gets a :class:`~pylifx.LifxBulb` by it's MAC address from the list of
+        bulbs in :attr:`~pylifx.LifxController.bulbs`, or creates a new instance
+        of :class:`~pylifx.LifxBulb` if the bulb information is not known.
+
+        Does not require that :meth:`~pylifx.LifxController.find_bulbs` is
+        called first, however the label of the bulb will not be available.
+
+        This method does not check to see if the given MAC address is available
+        on the LIFX PAN, or has ever been a member of it.  This will always
+        return a :class:`~pylifx.LifxBulb`.
+
+        :param str addr: MAC address of the bulb.
+
+        :returns: Bulb with the given MAC address.
+        :rtype: :class:`~pylifx.LifxBulb`
+        """
         addr = processMAC(addr)
+
         # if there's an existing bulb entry, re-use it
-        for bulb in self.bulbs:
-            if bulb._bulb_abbr == addr:
-                return bulb
+        if self.bulbs is not None:
+            for bulb in self.bulbs:
+                if bulb._bulb_abbr == addr:
+                    return bulb
+
         # no bulb entry, create a new one but don't cache it because we don't know the
         # label.
         return LifxBulb(self, addr)
@@ -372,7 +456,8 @@ class LifxBulbEmulator:
         with self._prop_lock:
             sock.send_as_bulb('powerState', **self._properties)
             self._udpsock.send_as_bulb('powerState', **self._properties)
-            
+
+
 class LifxBulbBridge(LifxBulbEmulator):
     _reserved_fields = {
         'bulb_addr',
@@ -387,3 +472,4 @@ class LifxBulbBridge(LifxBulbEmulator):
         if not msg_type.startswith('getPanGateway'):
             new_data = dict([(k, v) for k, v in msg_data.items() if k not in self._reserved_fields])
             self._udpsock.send_to_bulb(msg_type, **new_data)
+

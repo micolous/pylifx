@@ -17,7 +17,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 from __future__ import absolute_import
 # Compatibility
-from .interface import LifxController, LifxBulbEmulator, LifxBulbBridge
+from .interface import LifxController, LifxBulb, LifxBulbEmulator, LifxBulbBridge
 
 
 __all__ = ['interface', 'networking', 'packet', 'scene', 'LifxController', 'LifxBulbEmulator', 'LifxBulbBridge']
