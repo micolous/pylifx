@@ -17,7 +17,8 @@ Huge thanks to `Kevin Bowman (magicmonkey) <https://github.com/magicmonkey/>`_ a
 
 Without their work on the lifxjs project, this one would not have been possible.
 
-Current features:
+Current features
+================
 
 * Allows the LIFX bulb smartphone app to work by "faking" a bulb and relaying
   commands to the real one (see examples/bridge.py).
@@ -32,20 +33,23 @@ Current features:
 
 * Using multiple bulbs behind a single PAN gateway.
 
-Upcoming features:
+Upcoming features
+=================
 
 * Auto-discovery of bulbs (yes, should have been there already).
 
-How to install:
+How to install
+==============
 
 * Get Python (tested with 2.7, others may work). I use the `Python(x, y) distribution <https://code.google.com/p/pythonxy/>`_.
 * Ensure you have the Python setuptools.
 * Run ``easy_install pylifx`` from a command prompt or terminal.
 * You're done.
 
-Two common issues with installing:
+Two common issues with installing
+---------------------------------
 
-* Linux users - ensure you have python-dev installed (for the netifaces package).
-* Windows users - install the pre-built binaries for your python distribution
+* **Linux users** - ensure you have python-dev installed (for the netifaces package).
+* **Windows users** - install the pre-built binaries for your python distribution
   using the links in the following URL: http://alastairs-place.net/projects/netifaces/
   (The section is just above the start of the Changelog section).
