@@ -5,15 +5,15 @@ pylifx
 A Python library to control and monitor LIFX bulbs. Also provides a workaround
 for users having issues with controlling LIFX bulbs on their network.
 
-GitHub: https://github.com/derkarnold/pylifx
-PyPi: https://pypi.python.org/pypi/pylifx
+* GitHub: https://github.com/derkarnold/pylifx
+* PyPi: https://pypi.python.org/pypi/pylifx
 
 Originally written to allow the LIFX bulb to work in non-standard networks, but
 it is growing to be much more.
 
-Contributors: `Deryck Arnold <https://github.com/derkarnold>`, `Michael Farrell (micolous) <https://github.com/micolous/>`.
+Contributors: `Deryck Arnold <https://github.com/derkarnold>`_, `Michael Farrell (micolous) <https://github.com/micolous/>`_.
 
-Huge thanks to `Kevin Bowman (magicmonkey) <https://github.com/magicmonkey/>`_ and others for the `lifxjs project on GitHub <https://github.com/magicmonkey/lifxjs/>`_
+Huge thanks to `Kevin Bowman (magicmonkey) <https://github.com/magicmonkey/>`_ and others for the `lifxjs project on GitHub <https://github.com/magicmonkey/lifxjs/>`_.
 
 Without their work on the lifxjs project, this one would not have been possible.
 
@@ -38,7 +38,7 @@ Upcoming features:
 
 How to install:
 
-* Get Python (tested with 2.7, others may work). I use the `Python(x, y) distribution <https://code.google.com/p/pythonxy/>`.
+* Get Python (tested with 2.7, others may work). I use the `Python(x, y) distribution <https://code.google.com/p/pythonxy/>`_.
 * Ensure you have the Python setuptools.
 * Run ``easy_install pylifx`` from a command prompt or terminal.
 * You're done.
