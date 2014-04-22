@@ -61,8 +61,8 @@ If you don't want to build the documentation yourself, you can `view it online
 <http://some-documentation-server.example.com/>`_.
 
 Documentation may be built if you have `Sphinx <http://sphinx-doc.org/>`_.
-You'll need to have pylifx built and in your PYTHON_PATH (or run sphinx from
-inside of a virtualenv that has it installed).  You can then build the HTML
+You'll need to have pylifx built and in your ``PYTHON_PATH`` (or run Sphinx from
+inside of a ``virtualenv`` that has it installed).  You can then build the HTML
 documentation with:
 
 .. code-block:: console
