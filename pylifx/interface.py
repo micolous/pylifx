@@ -94,7 +94,7 @@ class LifxBulb(object):
         :param float red: Level between 0.0 and 1.0 for the brightness of the red channel.
         :param float green: Level between 0.0 and 1.0 for the brightness of the green channel.
         :param float blue: Level between 0.0 and 1.0 for the brightness of the blue channel.
-        :param float fadeTime: Time, in seconds, to perform the colour fade transition over.
+        :param float fadeTime: Time, in milliseconds, to perform the colour fade transition over.
         """
         return self._controller.set_rgb(red, green, blue, fadeTime, self._bulb_addr)
 
@@ -105,7 +105,7 @@ class LifxBulb(object):
         :param float hue: Value between 0.0 and 1.0 indicating the hue of the colour to set, with red being 0.0.
         :param float saturation: Value between 0.0 and 1.0 indicating the saturation of the colour to set, with 0.0 being no colour saturation.
         :param float brightness: Value between 0.0 and 1.0 indicating the brightness of the colour to set, with 0.0 being darkest.
-        :param float fadeTime: Time, in seconds, to perform the colour fade transition over.
+        :param float fadeTime: Time, in milliseconds, to perform the colour fade transition over.
 
         """
         return self._controller.set_hsb(hue, saturation, brightness, fadeTime, self._bulb_addr)
@@ -115,7 +115,7 @@ class LifxBulb(object):
         Sets the colour of the light bulb to white, with the given colour temperature.
         
         :param int kelvin: Colour temperature to set to the bulb to, between 0 and 65535.
-        :param float fadeTime: Time, in seconds, to perform the colour fade transition over.
+        :param float fadeTime: Time, in milliseconds, to perform the colour fade transition over.
 
         """
         return self._controller.set_temperature(kelvin, fadeTime, self._bulb_addr)
@@ -186,7 +186,7 @@ class LifxController(object):
             k['bulb_addr'] = processMAC(bulb_addr)
         return k
     
-    def on(self, bulb_addr=None):
+    def on(self, bulb_addr=None, fadeTime=1000):
         """
         Turns on the light bulb.
         
@@ -194,9 +194,9 @@ class LifxController(object):
         """
         k = self._annotate_bulb_addr(bulb_addr)
         print 'Turning on', self._name if bulb_addr is None else k['bulb_addr']
-        self._socket.send_to_bulb('setPowerState', onoff = 0xff, **k)
+        self._socket.send_to_bulb('setPowerState', onoff = 0xffff, fadeTime = fadeTime, **k)
 
-    def off(self, bulb_addr=None):
+    def off(self, bulb_addr=None, fadeTime=1000):
         """
         Turns off the light bulb.
         
@@ -204,7 +204,7 @@ class LifxController(object):
         """
         k = self._annotate_bulb_addr(bulb_addr)
         print 'Turning off', self._name if bulb_addr is None else k['bulb_addr']
-        self._socket.send_to_bulb('setPowerState', onoff = 0x00, **k)
+        self._socket.send_to_bulb('setPowerState', onoff = 0x00, fadeTime = fadeTime, **k)
         
     def set_rgb(self, red, green, blue, fadeTime = 1, bulb_addr=None):
         """
@@ -213,11 +213,11 @@ class LifxController(object):
         :param float red: Level between 0.0 and 1.0 for the brightness of the red channel.
         :param float green: Level between 0.0 and 1.0 for the brightness of the green channel.
         :param float blue: Level between 0.0 and 1.0 for the brightness of the blue channel.
-        :param float fadeTime: Time, in seconds, to perform the colour fade transition over.
+        :param float fadeTime: Time, in milliseconds, to perform the colour fade transition over.
         :param str bulb_addr: (optional) MAC address of the bulb to control, or None to control all bulbs using this PAN gateway.
         """
         k = self._annotate_bulb_addr(bulb_addr)
-        print 'Setting colour of %s to (R:%f, G:%f, B:%f) over %d seconds' % (self._name if bulb_addr is None else k['bulb_addr'], red, green, blue, fadeTime)
+        print 'Setting colour of %s to (R:%f, G:%f, B:%f) over %d ms' % (self._name if bulb_addr is None else k['bulb_addr'], red, green, blue, fadeTime)
         hue, saturation, brightness = rgb_to_hsv(red, green, blue)
         self._set_colour(hue, saturation, brightness, 0, fadeTime, **k)
     
@@ -228,12 +228,12 @@ class LifxController(object):
         :param float hue: Value between 0.0 and 1.0 indicating the hue of the colour to set, with red being 0.0.
         :param float saturation: Value between 0.0 and 1.0 indicating the saturation of the colour to set, with 0.0 being no colour saturation.
         :param float brightness: Value between 0.0 and 1.0 indicating the brightness of the colour to set, with 0.0 being darkest.
-        :param float fadeTime: Time, in seconds, to perform the colour fade transition over.
+        :param float fadeTime: Time, in milliseconds, to perform the colour fade transition over.
         :param str bulb_addr: (optional) MAC address of the bulb to control, or None to control all bulbs using this PAN gateway.
 
         """
         k = self._annotate_bulb_addr(bulb_addr)
-        print 'Setting colour of %s to (H:%f, S:%f, B:%f) over %d seconds' % (self._name if bulb_addr is None else k['bulb_addr'], hue, saturation, brightness, fadeTime)
+        print 'Setting colour of %s to (H:%f, S:%f, B:%f) over %d ms' % (self._name if bulb_addr is None else k['bulb_addr'], hue, saturation, brightness, fadeTime)
         self._set_colour(hue, saturation, brightness, 0, fadeTime, **k)
     
     def set_temperature(self, kelvin, fadeTime = 1, bulb_addr=None):
@@ -241,12 +241,12 @@ class LifxController(object):
         Sets the colour of the light bulb to white, with the given colour temperature.
         
         :param int kelvin: Colour temperature to set to the bulb to, between 0 and 65535.
-        :param float fadeTime: Time, in seconds, to perform the colour fade transition over.
+        :param float fadeTime: Time, in milliseconds, to perform the colour fade transition over.
         :param str bulb_addr: (optional) MAC address of the bulb to control, or None to control all bulbs using this PAN gateway.
 
         """
         k = self._annotate_bulb_addr(bulb_addr)
-        print 'Setting colour temperature of %s to (%dK) over %d seconds' % (self._name if bulb_addr is None else k['bulb_addr'], kelvin, fadeTime)
+        print 'Setting colour temperature of %s to (%dK) over %d ms' % (self._name if bulb_addr is None else k['bulb_addr'], kelvin, fadeTime)
         self._set_colour(0, 0, 1.0, kelvin, fadeTime, **k)
 
 

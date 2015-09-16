@@ -25,15 +25,23 @@ _PACKET_TYPE_SIZE = 16
 _PACKET_TYPE_SPEC = 'uintle:' + str(_PACKET_TYPE_SIZE)
 _HEADER_SPEC = [
     ('packet_size', 'uintle:16'),
-    ('protocol', 'uintle:16'),
-    ('reserved1', 'pad:32'),
+    ('origin', 'uint:2'),
+    ('tagged', 'bool'),
+    ('addressable', 'bool'),
+    ('protocol', 'uint:12'),
+	('source', 'uintle:32'),
+
     ('bulb_addr', 'hex:48'),
-    ('reserved2', 'pad:16'),
+    ('reserved1', 'pad:16'), # MAC 0-fill
     ('site_addr', 'hex:48'),
-    ('reserved3', 'pad:16'),
-    ('timestamp', 'uintbe:64'),
+    ('reserved3', 'pad:6'),
+    ('ack_required', 'bool'),
+    ('res_required', 'bool'),
+    ('sequence', 'uintle:8'),
+
+	('reserved4', 'pad:64'),
     ('packet_type', _PACKET_TYPE_SPEC),
-    ('reserved4', 'pad:16'),
+    ('reserved5', 'pad:16'),
 ]
 _HEADER_SIZE = 36
 
@@ -54,11 +62,11 @@ _PAYLOADS = {
             ('duration', 'uintbe:32'),
         ],
     },
-    'setLightColour': {
-        'packet_type': 0x66,
+    'setLightColour': {  # SetColor
+        'packet_type': 102,
         'payload_size': 13,
         'payload_spec': [
-            ('stream', 'uintbe:8'),
+            ('reserved1', 'pad:8'),
             ('hue', 'uintle:16'),
             ('saturation', 'uintle:16'),
             ('brightness', 'uintle:16'),
@@ -341,21 +349,22 @@ _PAYLOADS = {
         ],
     },
     'powerState': {
-        'packet_type': 0x16,
+        'packet_type': 118,
         'payload_size': 2,
         'payload_spec': [
             ('onoff', 'uintbe:16'),
         ],
     },
     'setPowerState': {
-        'packet_type': 0x15,
-        'payload_size': 2,
+        'packet_type': 117,
+        'payload_size': 6,
         'payload_spec': [
-            ('onoff', 'uintbe:16'),
+            ('onoff', 'uintle:16'),
+            ('fadeTime', 'uintle:32'),
         ],
     },
     'getPowerState': {
-        'packet_type': 0x14,
+        'packet_type': 116,
         'payload_size': 0,
         'payload_spec': [
 

@@ -21,10 +21,12 @@ from .packet import encode, decode
 from re import match
 from thread import start_new_thread
 from netifaces import ifaddresses, interfaces
+from random import randint
 
 _RECV_BUFFER_SIZE = 1024
-_LIFX_PROTO_TOBULB = 13312
-_LIFX_PROTO_ASBULB = 21504
+_LIFX_PROTO = 2 # 1024 (le)
+#_LIFX_PROTO_TOBULB = 13312
+#_LIFX_PROTO_ASBULB = 21504
 _BLANK_MAC = '00:00:00:00:00:00'
 _MAC_ADDR_FORMAT = '([A-Fa-f0-9]{2})[:\-]?([A-Fa-f0-9]{2})[:\-]?([A-Fa-f0-9]{2})[:\-]?([A-Fa-f0-9]{2})[:\-]?([A-Fa-f0-9]{2})[:\-]?([A-Fa-f0-9]{2})'
 _AVAILABLE_INTERFACES = {}
@@ -52,7 +54,7 @@ def processMAC(mac):
     """
     Validate and strip separator characters from a MAC address, given in one of the
     following formats:
-    
+
     -  ``00:11:22:33:44:55``
     -  ``00-11-22-33-44-55``
     -  ``001122334455``
@@ -77,6 +79,8 @@ class LifxSocket(object):
         self._socket = sock
         self._net_addr = net_addr
         self._socket.settimeout(1.0)
+        self._source = randint(0, 0xffffffff)
+        self._sequence = 0
         
     def __del__(self):
         self.close()
@@ -93,9 +97,10 @@ class LifxSocket(object):
             self._socket = None
     
     def send_to_bulb(self, packet_name, **kwargs):
-        self._send(_LIFX_PROTO_TOBULB, packet_name, kwargs)
+        self._send(_LIFX_PROTO, packet_name, kwargs)
     
     def send_as_bulb(self, packet_name, **kwargs):
+    	# FIXME: update for proto2
         self._send(_LIFX_PROTO_ASBULB, packet_name, kwargs)
         
     def recv(self):
@@ -120,10 +125,20 @@ class LifxSocket(object):
 
     def _send(self, protocol, packet_name, kwargs):
         packet = dict(
+        	origin=0,
+        	tagged=False,
+        	addressable=True,
             protocol=protocol,
+            source=self._source,
             site_addr=self._site_addr,
-            bulb_addr=self._bulb_addr
+            bulb_addr=self._bulb_addr,
+            ack_required=False,
+            res_required=False,
+            sequence=self._sequence
         )
+        self._sequence += 1
+        if self._sequence > 255:
+        	self._sequence = 0
         packet.update(kwargs)
 
         packet = encode(packet_name, **packet)
@@ -168,3 +183,4 @@ class LifxBulbTCPServer:
             print 'New TCP connection on', str(self._bind_addr) + ':', addr
             lifx_socket = LifxSocket(None, None, sock, addr)
             start_new_thread(self._handle_func, (lifx_socket,))
+
